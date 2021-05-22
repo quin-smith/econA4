@@ -46,8 +46,8 @@ x2 <-dam_lm[["coefficients"]][["warm2"]]
 int <-dam_lm[["coefficients"]][["(Intercept)"]]
 
 warm <- warm %>% 
-  mutate(dam_base = (warming_baseline*x) + (warming_baseline*x2)^2 + int,
-         dam_pulse = (warming_pulse*x) + (warming_pulse*x2)^2 + int,
+  mutate(dam_base = (warming_baseline*x) + ((warming_baseline)^2*x2) + int,
+         dam_pulse = (warming_pulse*x) + ((warming_pulse)^2*x2) + int,
          dam_diff = dam_pulse - dam_base,
          dam_ton = dam_diff/35000000000)
 
