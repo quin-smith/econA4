@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 library(ggpubr)
+library(patchwork)
 ```
 
 ```{r}
@@ -19,6 +20,7 @@ warm <- read.csv("data/warming.csv")
 ```
 
 ```{r}
+#Question 1
 #dam^2
 dam <- dam %>% 
   mutate(warm2 = warming^2)
@@ -31,12 +33,27 @@ dam_lm[["coefficients"]][["(Intercept)"]] <- 0
 #plot
 dam_plot <- ggplot(data=dam) +
   geom_point(aes(x=warming, y=damages)) +
-  geom_smooth(data=dam_lm, aes(x=warming, y=damages)) +
-  stat_regline_equation(data=dam_lm, aes(x=warming, y=damages)) +
+  stat_smooth(data=dam_lm, aes(x=warming, y=damages)) +
   theme_bw()
 
 dam_plot
 ```
 
+```{r}
+#Question 2
+x <-dam_lm[["coefficients"]][["warming"]]
+x2 <-dam_lm[["coefficients"]][["warm2"]]
+int <-dam_lm[["coefficients"]][["(Intercept)"]]
+
+warm <- warm %>% 
+  mutate(dam_base = (warming_baseline*x) + (warming_baseline*x2) + int,
+         dam_pulse = (warming_pulse*x) + (warming_pulse*x2) + int,
+         dam_diff = ((warming_pulse-warming_baseline)*x) + 
+           ((warming_pulse-warming_baseline)*x2) + int,
+         dam_ton = dam_diff/35000000000)
+
+#graphs
+dam_base_plot <- ggplot()
+```
 
 
