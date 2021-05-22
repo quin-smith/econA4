@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
+library(ggpubr)
 ```
 
 ```{r}
@@ -22,9 +23,8 @@ warm <- read.csv("data/warming.csv")
 dam <- dam %>% 
   mutate(warm2 = warming^2)
 
-
 #dam_lm
-dam_lm <- lm(damages ~ warming + dam2, data=dam)
+dam_lm <- lm(damages ~ warming + warm2, data=dam)
 
 dam_lm[["coefficients"]][["(Intercept)"]] <- 0
 
@@ -32,6 +32,7 @@ dam_lm[["coefficients"]][["(Intercept)"]] <- 0
 dam_plot <- ggplot(data=dam) +
   geom_point(aes(x=warming, y=damages)) +
   geom_smooth(data=dam_lm, aes(x=warming, y=damages)) +
+  stat_regline_equation(data=dam_lm, aes(x=warming, y=damages)) +
   theme_bw()
 
 dam_plot
