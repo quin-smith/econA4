@@ -74,9 +74,53 @@ q2_patched
 ```
 
 ```{r}
+#Question 3
+warm <- warm %>%
+  mutate(scc1 = dam_diff/ (1+0.01)^X,
+         scc2 = dam_diff/ (1+0.02)^X,
+         scc3 = dam_diff/ (1+0.03)^X,
+         scc4 = dam_diff/ (1+0.04)^X,
+         scc5 = dam_diff/ (1+0.05)^X) %>% 
+  mutate(scc1_sum = sum(scc1),
+         scc2_sum = sum(scc2),
+         scc3_sum = sum(scc3),
+         scc4_sum = sum(scc4),
+         scc5_sum = sum(scc5))
 
+scc_df <- data.frame(c(0.01, 0.02, 0.03, 0.04, 0.05)) %>% 
+  cbind(c(warm$scc1_sum[1], warm$scc2_sum[1], warm$scc3_sum[1], warm$scc4_sum[1], warm$scc5_sum[1]))
+
+colnames(scc_df) <- c("rate", "scc_sum")
+
+scc_plot <- ggplot(data = scc_df) +
+  geom_point(aes(x=rate, y=scc_sum)) +
+  theme_bw()
+
+scc_plot
 ```
 
+```{r}
+#Question 4
+rams <- 0.001+(2*0.01)
+
+warm <- warm %>%
+  mutate(sccrams = dam_diff/ (1+rams)^X) %>% 
+  mutate(sccrams_sum = sum(sccrams))
+
+sccrams_df <- data.frame(c(0.01, 0.02, 0.03, 0.04, 0.05, rams)) %>% 
+  cbind(c(warm$scc1_sum[1], warm$scc2_sum[1], warm$scc3_sum[1], warm$scc4_sum[1], warm$scc5_sum[1], warm$sccrams_sum[1]))
+
+colnames(sccrams_df) <- c("rate", "scc_sum")
+
+rams_pt <- subset(sccrams_df, rate == 0.021)
+
+scc_plotq4 <- ggplot(data = sccrams_df) +
+  geom_point(aes(x=rate, y=scc_sum)) +
+  geom_point(data = rams_pt, aes(x=rate, y=scc_sum), color = "red") +
+  theme_bw()
+
+scc_plotq4
+```
 
 
 
