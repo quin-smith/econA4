@@ -46,14 +46,39 @@ x2 <-dam_lm[["coefficients"]][["warm2"]]
 int <-dam_lm[["coefficients"]][["(Intercept)"]]
 
 warm <- warm %>% 
-  mutate(dam_base = (warming_baseline*x) + (warming_baseline*x2) + int,
-         dam_pulse = (warming_pulse*x) + (warming_pulse*x2) + int,
-         dam_diff = ((warming_pulse-warming_baseline)*x) + 
-           ((warming_pulse-warming_baseline)*x2) + int,
+  mutate(dam_base = (warming_baseline*x) + (warming_baseline*x2)^2 + int,
+         dam_pulse = (warming_pulse*x) + (warming_pulse*x2)^2 + int,
+         dam_diff = dam_pulse - dam_base,
          dam_ton = dam_diff/35000000000)
 
 #graphs
-dam_base_plot <- ggplot()
+dam_base_plot <- ggplot(data = warm) +
+  geom_point(aes(x=year, y=dam_base)) +
+  theme_bw()
+
+dam_pulse_plot <- ggplot(data = warm) +
+  geom_point(aes(x=year, y=dam_pulse)) +
+  theme_bw()
+
+dam_diff_plot <- ggplot(data = warm) +
+  geom_point(aes(x=year, y=dam_diff)) +
+  theme_bw()
+
+dam_ton_plot <- ggplot(data = warm) +
+  geom_point(aes(x=year, y=dam_ton)) +
+  theme_bw()
+
+q2_patched <- (dam_base_plot + dam_pulse_plot) / (dam_diff_plot + dam_ton_plot)
+
+q2_patched
 ```
+
+```{r}
+
+```
+
+
+
+
 
 
