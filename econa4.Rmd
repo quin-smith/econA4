@@ -1,8 +1,10 @@
 ---
-title: "Econ Assignment 4"
-author: "Quin Smith"
+title: "ESM 204 Assignment 4"
+author: "Quin Smith & Trent Buchanan"
 date: "5/22/2021"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -13,13 +15,15 @@ library(ggpubr)
 library(patchwork)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 #read data
 dam <- read.csv(here("data/damages.csv"))
 warm <- read.csv("data/warming.csv")
 ```
 
-```{r}
+## Question 1
+
+```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 1:** Esimated Cost Function equation overlayed above dollar value of damages versus change in global mean temperature."}
 #Question 1
 #dam^2
 dam <- dam %>% 
@@ -34,12 +38,16 @@ dam_lm[["coefficients"]][["(Intercept)"]] <- 0
 dam_plot <- ggplot(data=dam) +
   geom_point(aes(x=warming, y=damages)) +
   stat_smooth(data=dam_lm, aes(x=warming, y=damages)) +
+  labs(x = "Change in Global Mean Temp (°C)", y = "Damages ($)") +
+  annotate(geom = "text", x=5.0, y=1500000000000000, label= expression("y = 1.958902e+13 x"^2*"- 3.018856e+12x" )) +
   theme_bw()
 
 dam_plot
 ```
 
-```{r}
+## Question 2
+
+```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 2: 1.** Damages over time without pulse **2.** Damages over time with pulse **3.** Differences in damages over time arising from the pulse **4.** Difference in damages over time from the pulse per ton of CO2."}
 #Question 2
 x <-dam_lm[["coefficients"]][["warming"]]
 x2 <-dam_lm[["coefficients"]][["warm2"]]
@@ -54,26 +62,32 @@ warm <- warm %>%
 #graphs
 dam_base_plot <- ggplot(data = warm) +
   geom_point(aes(x=year, y=dam_base)) +
+  labs(x = "Year", y = "Damages ($)") +
   theme_bw()
 
 dam_pulse_plot <- ggplot(data = warm) +
   geom_point(aes(x=year, y=dam_pulse)) +
+  labs(x = "Year", y = "Damages ($)") +
   theme_bw()
 
 dam_diff_plot <- ggplot(data = warm) +
   geom_point(aes(x=year, y=dam_diff)) +
+  labs(x = "Year", y = "Difference in Damages ($)") +
   theme_bw()
 
 dam_ton_plot <- ggplot(data = warm) +
   geom_point(aes(x=year, y=dam_ton)) +
+  labs(x = "Year", y = "Damages ($/ton)") +
   theme_bw()
 
 q2_patched <- (dam_base_plot + dam_pulse_plot) / (dam_diff_plot + dam_ton_plot)
 
-q2_patched
+q2_patched + plot_annotation(tag_levels = "1", tag_suffix = ".")
 ```
 
-```{r}
+## Question 3
+
+```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 3:** Social Cost of Carbon versus a range of discount rates (1-5%)."}
 #Question 3
 warm <- warm %>%
   mutate(scc1 = dam_diff/ (1+0.01)^X,
@@ -93,13 +107,16 @@ scc_df <- data.frame(c(0.01, 0.02, 0.03, 0.04, 0.05)) %>%
 colnames(scc_df) <- c("rate", "scc_sum")
 
 scc_plot <- ggplot(data = scc_df) +
-  geom_point(aes(x=rate, y=scc_sum)) +
+  geom_point(aes(x=rate, y=scc_sum), size = 3) +
+  labs(y = "Social Cost of Carbon ($/ton)", x = "Discount rate (decimal)") +
   theme_bw()
 
 scc_plot
 ```
 
-```{r}
+## Question 4
+
+```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 4:** Social Cost of Carbon versus a range of discount rates (1-5%). The red point indicates the Social Cost of Carbon using the Ramsey Rule equation, which was calulated to be **$2.393246e+12**."}
 #Question 4
 rams <- 0.001+(2*0.01)
 
@@ -114,15 +131,51 @@ colnames(sccrams_df) <- c("rate", "scc_sum")
 
 rams_pt <- subset(sccrams_df, rate == 0.021)
 
-scc_plotq4 <- ggplot(data = sccrams_df) +
-  geom_point(aes(x=rate, y=scc_sum)) +
-  geom_point(data = rams_pt, aes(x=rate, y=scc_sum), color = "red") +
+scc_plotq4 <- ggplot(data = scc_df) +
+  geom_point(aes(x=rate, y=scc_sum), size = 3) +
+  geom_point(data = rams_pt, aes(x=rate, y=scc_sum), color = "red", size = 4) +
+  labs(x = "Discount Rate (decimal)", y = "Social Cost of Carbon ($/ton)") +
   theme_bw()
 
 scc_plotq4
 ```
 
+## Question 5
 
+```{r}
+#Question 5
 
+#policy A
+warm5A <- warm %>% 
+  select(X, year, warming_baseline, dam_base) %>% 
+  mutate(dam_base_sc = (dam_base/ (1+0.02)^X),
+         warming_1.5 = warming_baseline * 1.5,
+         dam_1.5 = (warming_1.5*x) + ((warming_1.5)^2*x2),
+         dam_1.5_sc = (dam_1.5/ (1+0.02)^X))
 
+dam_base_sum <- sum(warm5A$dam_base_sc) * .5
+dam_1.5_sum <- sum(warm5A$dam_1.5_sc) * .5
 
+expect_val_A <- dam_base_sum + dam_1.5_sum
+
+#policy B
+warm5B <- warm %>% 
+  select(X, year, warming_baseline) %>% 
+  mutate(warming = case_when(
+    year < 2050 ~ warming_baseline,
+    year >= 2050 ~ 1.29),
+    dam_b = (warming*x) + ((warming)^2*x2),
+    dam_b_sc = dam_b/ (1+0.02)^X
+  )
+
+expect_val_B <- sum(warm5B$dam_b_sc)
+
+#what is X for policy B?
+X_polB <- expect_val_A - expect_val_B
+```
+
+The expected present value of damages up to 2100 under **Policy A** is **$`r expect_val_A`**.
+
+The expected present value of damages up to 2100 under **Policy B** is **$`r expect_val_B`**.
+
+The cost of undertaking **Policy B (X)** would have to be **$`r X_polB`** (difference between the expected values of Policies A and B) to make economic sense to pursue **Policy B** instead of the business-as-usual approach of **Policy A**. This answer would change if society was risk averse. The cost of implementing Policy B could increase to more than $`r X_polB` because the utility of the guaranteed reduction of global temperature change is higher than Policy A to a risk averse society. However, there is an undetermined value of X that would push even a risk averse society to adopt Policy A. This would depend on society's utility function. 
