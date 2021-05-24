@@ -116,7 +116,7 @@ scc_plot
 
 ## Question 4
 
-```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 4:** Social Cost of Carbon versus a range of discount rates (1-5%). The red point indicates the Social Cost of Carbon using the Ramsey Rule equation, which was calulated to be **$2.393246e+12**."}
+```{r, warning=FALSE, message=FALSE, fig.cap="**Figure 4:** Social Cost of Carbon versus a range of discount rates (1-5%). The red point indicates the Social Cost of Carbon using the Ramsey Rule equation, which was calulated to be **$2.393246e+12** at a discount rate of **2.1% (0.021)**."}
 #Question 4
 rams <- 0.001+(2*0.01)
 
@@ -129,7 +129,7 @@ sccrams_df <- data.frame(c(0.01, 0.02, 0.03, 0.04, 0.05, rams)) %>%
 
 colnames(sccrams_df) <- c("rate", "scc_sum")
 
-rams_pt <- subset(sccrams_df, rate == 0.021)
+rams_pt <- subset(sccrams_df, rate == rams)
 
 scc_plotq4 <- ggplot(data = scc_df) +
   geom_point(aes(x=rate, y=scc_sum), size = 3) +
@@ -178,4 +178,4 @@ The expected present value of damages up to 2100 under **Policy A** is **$`r exp
 
 The expected present value of damages up to 2100 under **Policy B** is **$`r expect_val_B`**.
 
-The cost of undertaking **Policy B (X)** would have to be **$`r X_polB`** (difference between the expected values of Policies A and B) to make economic sense to pursue **Policy B** instead of the business-as-usual approach of **Policy A**. This answer would change if society was risk averse. The cost of implementing Policy B could increase to more than $`r X_polB` because the utility of the guaranteed reduction of global temperature change is higher than Policy A to a risk averse society. However, there is an undetermined value of X that would push even a risk averse society to adopt Policy A. This would depend on society's utility function. 
+In order to make economic sense, the cost of undertaking **Policy B (X)** would have to be **$`r X_polB`** (the difference between the expected values of Policies A and B) to pursue **Policy B** instead of the business-as-usual approach of **Policy A**. This answer would change if society was risk averse, in which case the sensible cost of implementing Policy B could increase from $`r X_polB`. This is because to a risk averse society, the utility of the guaranteed reduction of global temperature change is higher than Policy A. Depending on a society's utility function, some higher value of X would push even a risk averse society to adopt Policy A.
